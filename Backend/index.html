@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PashuMitra — Cattle Wisdom, Within Reach</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=Noto+Sans+Devanagari:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root {
+  --cream: #F5F0E8;
+  --cream2: #EDE8DC;
+  --forest: #2C4A2E;
+  --forest-light: #3D6B40;
+  --forest-dim: #4A7A4D;
+  --sage: #8BA888;
+  --sage-light: #B8CEB6;
+  --rust: #C4714A;
+  --rust-light: #E8916A;
+  --stone: #6B6458;
+  --stone-light: #9B9288;
+  --warm-white: #FAFAF7;
+  --text-dark: #1C1C1A;
+  --text-mid: #4A4540;
+  --text-light: #7A7570;
+  --border: #D8D2C8;
+  --card-bg: #FEFCF8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--text-dark);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body.hindi {
+  font-family: 'Noto Sans Devanagari', 'DM Sans', sans-serif;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--cream2); }
+::-webkit-scrollbar-thumb { background: var(--sage); border-radius: 10px; }
+
+/* ══════════════════════════════════════
+   NAVBAR
+══════════════════════════════════════ */
+.navbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(245,240,232,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Playfair Display', serif;
+  font-size: 20px; font-weight: 600;
+  color: var(--forest); cursor: pointer;
+}
+.nav-logo {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--forest);
+  display: flex; align-items: center; justify-content: center;
+}
+.nav-logo svg { width: 20px; height: 20px; }
+.nav-right { display: flex; align-items: center; gap: 1.5rem; }
+.nav-link {
+  font-size: 14px; color: var(--text-mid); cursor: pointer;
+  transition: color 0.2s; font-weight: 500;
+}
+.nav-link:hover { color: var(--forest); }
+.lang-toggle {
+  display: flex; align-items: center; gap: 6px;
+  background: transparent; border: 1px solid var(--border);
+  border-radius: 100px; padding: 4px 12px;
+  font-size: 13px; font-weight: 500; color: var(--text-mid);
+  cursor: pointer; transition: all 0.2s;
+}
+.lang-toggle:hover { border-color: var(--forest); color: var(--forest); }
+.btn-signin {
+  background: var(--forest); color: white;
+  border: none; border-radius: 100px;
+  padding: 8px 20px; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+}
+.btn-signin:hover { background: var(--forest-light); }
+.btn-signout {
+  display: flex; align-items: center; gap: 6px;
+  background: transparent; border: none;
+  font-size: 14px; color: var(--text-mid);
+  cursor: pointer; transition: color 0.2s;
+  font-family: 'DM Sans', sans-serif;
+}
+.btn-signout:hover { color: var(--forest); }
+
+/* ══════════════════════════════════════
+   PAGES (visibility)
+══════════════════════════════════════ */
+.page { display: none; padding-top: 60px; min-height: 100vh; }
+.page.active { display: block; }
+
+/* ══════════════════════════════════════
+   LANDING PAGE
+══════════════════════════════════════ */
+.hero {
+  padding: 5rem 3rem 4rem;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 3rem; align-items: center;
+  max-width: 1200px; margin: 0 auto;
+}
+.hero-eyebrow {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--rust);
+  margin-bottom: 1.2rem;
+}
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.5rem, 4vw, 3.8rem);
+  font-weight: 700; line-height: 1.1;
+  color: var(--text-dark); margin-bottom: 1.2rem;
+}
+.hero-sub {
+  font-size: 16px; color: var(--text-light);
+  line-height: 1.7; margin-bottom: 2rem; max-width: 440px;
+}
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn-primary {
+  background: var(--forest); color: white;
+  border: none; border-radius: 100px;
+  padding: 14px 28px; font-size: 15px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+  display: flex; align-items: center; gap: 8px;
+}
+.btn-primary:hover { background: var(--forest-light); transform: translateY(-1px); }
+.btn-outline {
+  background: transparent; color: var(--forest);
+  border: 1.5px solid var(--forest); border-radius: 100px;
+  padding: 13px 28px; font-size: 15px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+}
+.btn-outline:hover { background: var(--forest); color: white; }
+
+.hero-visual {
+  position: relative; height: 420px;
+}
+.hero-img-wrap {
+  width: 100%; height: 100%; border-radius: 20px; overflow: hidden;
+  background: linear-gradient(135deg, #4A7A4D 0%, #8BA888 50%, #C8D8A0 100%);
+  position: relative;
+}
+.hero-img-wrap::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.3));
+}
+.hero-img-bg {
+  width: 100%; height: 100%; object-fit: cover;
+  background: linear-gradient(135deg, #2C4A2E, #4A7A4D, #8BA888, #C8D8A0, #A8BC70);
+}
+.hero-card-float {
+  position: absolute; bottom: 24px; left: 24px;
+  background: white; border-radius: 14px;
+  padding: 14px 18px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  min-width: 200px;
+}
+.hcf-label { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--stone-light); margin-bottom: 4px; }
+.hcf-value { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; }
+.hcf-bar { height: 4px; background: var(--cream2); border-radius: 2px; }
+.hcf-fill { height: 4px; background: var(--forest); border-radius: 2px; width: 94%; }
+.hcf-conf { font-size: 11px; color: var(--stone-light); margin-top: 4px; }
+.hero-badge {
+  position: absolute; top: 24px; right: -10px;
+  background: rgba(44,74,46,0.9); color: white;
+  border-radius: 12px; padding: 10px 16px; text-align: right;
+}
+.hb-num { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600; }
+.hb-label { font-size: 11px; opacity: 0.8; }
+
+/* Features section */
+.features-section {
+  padding: 4rem 3rem;
+  max-width: 1200px; margin: 0 auto;
+}
+.sec-eyebrow {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--stone-light);
+  margin-bottom: 0.8rem;
+}
+.sec-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 3vw, 2.8rem); font-weight: 600;
+  color: var(--text-dark); margin-bottom: 2.5rem;
+}
+.features-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.feat-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border); border-radius: 16px;
+  padding: 1.5rem;
+  transition: all 0.25s; cursor: pointer;
+}
+.feat-card:hover {
+  border-color: var(--sage); transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(44,74,46,0.08);
+}
+.feat-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: var(--cream2);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 1rem;
+}
+.feat-icon svg { width: 20px; height: 20px; }
+.feat-name { font-weight: 600; font-size: 15px; margin-bottom: 6px; color: var(--text-dark); }
+.feat-desc { font-size: 13px; color: var(--text-light); line-height: 1.6; }
+
+/* Stats bar */
+.stats-bar {
+  background: var(--forest); color: white;
+  padding: 3rem;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 2rem; text-align: center;
+  margin: 2rem 0;
+}
+.stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem; font-weight: 700; color: var(--sage-light);
+}
+.stat-label { font-size: 13px; opacity: 0.75; margin-top: 4px; }
+
+/* Testimonial */
+.testimonial-section {
+  padding: 4rem 3rem; max-width: 1200px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;
+}
+.testi-card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 20px; padding: 2rem;
+}
+.testi-quote {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem; font-style: italic;
+  color: var(--text-mid); line-height: 1.7; margin-bottom: 1rem;
+}
+.testi-author { display: flex; align-items: center; gap: 10px; }
+.testi-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--sage-light); display: flex; align-items: center;
+  justify-content: center; font-size: 16px;
+}
+.testi-name { font-weight: 600; font-size: 14px; }
+.testi-place { font-size: 12px; color: var(--stone-light); }
+
+.land-footer {
+  background: var(--forest); color: rgba(255,255,255,0.7);
+  text-align: center; padding: 2rem;
+  font-size: 13px;
+}
+.land-footer strong { color: white; }
+
+/* ══════════════════════════════════════
+   AUTH PAGES
+══════════════════════════════════════ */
+.auth-page {
+  display: grid; grid-template-columns: 1fr 1fr;
+  min-height: 100vh; padding-top: 0 !important;
+}
+.auth-visual {
+  background: linear-gradient(135deg, #2C4A2E 0%, #4A7A4D 40%, #8BA888 100%);
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 3rem; position: relative; overflow: hidden;
+}
+.auth-visual::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='1' fill='rgba(255,255,255,0.08)'/%3E%3C/svg%3E") repeat;
+}
+.av-eyebrow { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 1rem; }
+.av-title { font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 600; color: white; line-height: 1.2; margin-bottom: 1rem; }
+.av-sub { font-size: 14px; color: rgba(255,255,255,0.75); line-height: 1.7; }
+.auth-form-wrap {
+  display: flex; flex-direction: column; justify-content: center;
+  align-items: center; padding: 4rem; background: var(--warm-white);
+}
+.auth-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 2.5rem; }
+.auth-logo span { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600; color: var(--forest); }
+.auth-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--stone-light); margin-bottom: 0.5rem; }
+.auth-title { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 600; margin-bottom: 2rem; color: var(--text-dark); }
+.auth-form { width: 100%; max-width: 380px; }
+.field-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--stone); margin-bottom: 6px; display: block; }
+.field-input {
+  width: 100%; padding: 12px 16px;
+  border: 1.5px solid var(--border); border-radius: 10px;
+  font-size: 15px; font-family: 'DM Sans', sans-serif;
+  background: white; color: var(--text-dark);
+  transition: border-color 0.2s; margin-bottom: 1.2rem;
+  outline: none;
+}
+.field-input:focus { border-color: var(--forest); }
+.btn-full {
+  width: 100%; padding: 14px; background: var(--forest);
+  color: white; border: none; border-radius: 10px;
+  font-size: 15px; font-weight: 500; font-family: 'DM Sans', sans-serif;
+  cursor: pointer; transition: all 0.2s; margin-bottom: 1rem;
+}
+.btn-full:hover { background: var(--forest-light); }
+.auth-switch { font-size: 14px; color: var(--text-light); text-align: center; }
+.auth-switch a { color: var(--forest); cursor: pointer; font-weight: 500; text-decoration: none; }
+.auth-switch a:hover { text-decoration: underline; }
+
+/* ══════════════════════════════════════
+   DASHBOARD
+══════════════════════════════════════ */
+.dash-header {
+  padding: 2rem 3rem 0;
+  max-width: 1200px; margin: 0 auto;
+}
+.dash-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--stone-light); margin-bottom: 0.4rem; }
+.dash-title { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 600; color: var(--text-dark); margin-bottom: 1.5rem; }
+
+.tab-row {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  padding: 0 3rem; max-width: 1200px; margin: 0 auto 2rem;
+}
+.tab-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 10px 18px; border-radius: 100px;
+  border: 1.5px solid var(--border);
+  background: transparent; color: var(--text-mid);
+  font-size: 14px; font-weight: 500; cursor: pointer;
+  transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+}
+.tab-btn:hover { border-color: var(--forest); color: var(--forest); }
+.tab-btn.active { background: var(--forest); color: white; border-color: var(--forest); }
+.tab-btn svg { width: 16px; height: 16px; }
+
+.dash-content {
+  padding: 0 3rem 3rem;
+  max-width: 1200px; margin: 0 auto;
+}
+
+/* Tab panels */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Upload area */
+.upload-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 2rem; align-items: start;
+}
+.step-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--stone-light); margin-bottom: 0.4rem; }
+.panel-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 600; color: var(--text-dark); margin-bottom: 0.5rem; }
+.panel-sub { font-size: 14px; color: var(--text-light); line-height: 1.7; margin-bottom: 1.5rem; }
+
+.drop-zone {
+  border: 2px dashed var(--border); border-radius: 16px;
+  padding: 3rem 2rem; text-align: center; cursor: pointer;
+  background: var(--card-bg); transition: all 0.2s;
+  position: relative; overflow: hidden; margin-bottom: 1rem;
+}
+.drop-zone:hover, .drop-zone.drag {
+  border-color: var(--forest);
+  background: rgba(44,74,46,0.03);
+}
+.drop-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.dz-icon {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--cream2);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1rem;
+}
+.dz-icon svg { width: 24px; height: 24px; }
+.dz-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 4px; }
+.dz-sub { font-size: 13px; color: var(--stone-light); }
+.preview-img { width: 100%; border-radius: 12px; object-fit: cover; max-height: 220px; display: none; margin-bottom: 1rem; }
+
+.btn-analyze {
+  width: 100%; padding: 14px; border-radius: 12px;
+  background: var(--sage); color: white; border: none;
+  font-size: 15px; font-weight: 500; font-family: 'DM Sans', sans-serif;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-analyze:hover { background: var(--forest); }
+.btn-analyze.ready { background: var(--forest); }
+
+/* Result panel */
+.result-panel {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 20px; padding: 2.5rem;
+  min-height: 300px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center;
+}
+.rp-placeholder { color: var(--stone-light); }
+.rp-placeholder-icon { font-size: 2rem; margin-bottom: 0.8rem; opacity: 0.4; }
+.rp-placeholder-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--stone); margin-bottom: 0.5rem; }
+.rp-placeholder-sub { font-size: 13px; }
+
+.result-card { width: 100%; text-align: left; }
+.rc-tag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 12px; border-radius: 100px; margin-bottom: 1rem; }
+.rc-tag.healthy { background: rgba(44,74,46,0.12); color: var(--forest); }
+.rc-tag.disease { background: rgba(196,113,74,0.15); color: var(--rust); }
+.rc-tag.breed { background: rgba(44,74,46,0.1); color: var(--forest); }
+.rc-name { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; margin-bottom: 0.4rem; }
+.rc-sub { font-size: 13px; color: var(--stone-light); margin-bottom: 1.5rem; }
+
+.confidence-bar-wrap { margin-bottom: 1.5rem; }
+.cb-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
+.cb-label span:first-child { font-weight: 500; color: var(--text-mid); }
+.cb-label span:last-child { font-weight: 700; color: var(--forest); }
+.cb-track { height: 6px; background: var(--cream2); border-radius: 3px; }
+.cb-fill { height: 6px; border-radius: 3px; background: var(--forest); transition: width 1s ease; }
+
+.rc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 1rem; }
+.rc-cell { background: var(--cream); border-radius: 10px; padding: 10px 12px; }
+.rc-cell-label { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--stone-light); margin-bottom: 3px; }
+.rc-cell-val { font-size: 14px; font-weight: 600; color: var(--text-dark); }
+
+.care-box { background: rgba(196,113,74,0.08); border: 1px solid rgba(196,113,74,0.2); border-radius: 12px; padding: 1rem; margin-top: 1rem; }
+.care-box h4 { font-size: 13px; font-weight: 600; color: var(--rust); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.care-box p { font-size: 12px; color: var(--text-mid); line-height: 1.6; }
+
+/* ── Breed Directory ── */
+.dir-layout {
+  display: grid; grid-template-columns: 280px 1fr;
+  gap: 1.5rem; align-items: start;
+}
+.dir-sidebar {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden;
+}
+.dir-search {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.dir-search-input {
+  width: 100%; padding: 8px 12px 8px 32px;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  font-size: 13px; font-family: 'DM Sans', sans-serif;
+  background: var(--cream); color: var(--text-dark);
+  outline: none; position: relative;
+}
+.dir-search-wrap { position: relative; }
+.dir-search-wrap::before {
+  content: '🔍';
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  font-size: 11px; pointer-events: none;
+}
+.dir-list { max-height: 520px; overflow-y: auto; }
+.dir-item {
+  padding: 12px 16px; cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.dir-item:hover { background: var(--cream); }
+.dir-item.active { background: var(--forest); color: white; }
+.dir-item.active .di-sub { color: rgba(255,255,255,0.7); }
+.di-name { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+.di-sub { font-size: 12px; color: var(--stone-light); }
+.dir-detail {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 16px; padding: 2rem;
+}
+.dd-type { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--stone-light); margin-bottom: 0.5rem; }
+.dd-name { font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 700; color: var(--text-dark); margin-bottom: 2px; }
+.dd-hindi { font-family: 'Noto Sans Devanagari', sans-serif; font-size: 1.1rem; color: var(--rust); margin-bottom: 0.5rem; }
+.dd-region { font-size: 14px; color: var(--stone-light); margin-bottom: 2rem; }
+.dd-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1.5rem; margin-bottom: 1.5rem;
+}
+.dd-field-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--stone-light); margin-bottom: 4px; }
+.dd-field-val { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 600; color: var(--text-dark); }
+.dd-field-val-sm { font-size: 15px; font-weight: 500; color: var(--text-dark); }
+.dd-special {
+  background: var(--cream); border-radius: 12px; padding: 1rem 1.2rem;
+}
+.dd-special-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--stone-light); margin-bottom: 6px; }
+.dd-special-val { font-size: 14px; color: var(--text-mid); line-height: 1.6; }
+
+/* ── Vet Finder ── */
+.vet-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start; }
+.vet-search-box { margin-bottom: 1.5rem; display: flex; gap: 10px; }
+.vet-input {
+  flex: 1; padding: 12px 16px 12px 40px;
+  border: 1.5px solid var(--border); border-radius: 100px;
+  font-size: 14px; font-family: 'DM Sans', sans-serif;
+  background: white; color: var(--text-dark); outline: none;
+  transition: border-color 0.2s;
+}
+.vet-input:focus { border-color: var(--forest); }
+.vet-input-wrap { position: relative; flex: 1; }
+.vet-input-wrap::before {
+  content: '📍';
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  font-size: 14px; pointer-events: none;
+}
+.btn-search {
+  padding: 12px 24px; background: var(--forest); color: white;
+  border: none; border-radius: 100px; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+}
+.btn-search:hover { background: var(--forest-light); }
+.btn-location {
+  padding: 12px 18px; background: transparent;
+  border: 1.5px solid var(--forest); border-radius: 100px;
+  font-size: 13px; font-weight: 500; color: var(--forest);
+  cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  font-family: 'DM Sans', sans-serif; display: flex; align-items: center; gap: 6px;
+}
+.btn-location:hover { background: var(--forest); color: white; }
+
+#map { height: 400px; border-radius: 16px; border: 1px solid var(--border); }
+.vet-list { max-height: 420px; overflow-y: auto; }
+.vet-card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1rem 1.2rem; margin-bottom: 10px;
+  cursor: pointer; transition: all 0.2s;
+}
+.vet-card:hover { border-color: var(--sage); box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
+.vc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.vc-name { font-weight: 600; font-size: 15px; color: var(--text-dark); }
+.vc-dist { font-size: 12px; font-weight: 500; color: var(--forest); background: rgba(44,74,46,0.08); border-radius: 100px; padding: 2px 10px; }
+.vc-meta { font-size: 12px; color: var(--stone-light); display: flex; align-items: center; gap: 6px; }
+.vc-meta-row { display: flex; align-items: center; gap: 4px; margin-bottom: 3px; }
+.vc-stars { color: #F5A623; font-size: 12px; }
+
+.vet-start-prompt { text-align: center; padding: 3rem 1rem; color: var(--stone-light); }
+.vsp-icon { font-size: 2rem; margin-bottom: 0.8rem; }
+.vsp-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--stone); margin-bottom: 0.4rem; }
+.vsp-sub { font-size: 13px; }
+
+/* ── History page ── */
+.history-wrap { padding: 2rem 3rem; max-width: 1200px; margin: 0 auto; }
+.hist-title { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 600; margin-bottom: 0.3rem; }
+.hist-sub { font-size: 14px; color: var(--text-light); margin-bottom: 2rem; }
+.hist-list { display: flex; flex-direction: column; gap: 10px; }
+.hist-card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1rem 1.4rem;
+  display: flex; align-items: center; gap: 1rem; cursor: pointer;
+  transition: all 0.2s;
+}
+.hist-card:hover { border-color: var(--sage); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.hist-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: var(--cream2); display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.hist-icon svg { width: 18px; height: 18px; }
+.hist-name { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+.hist-meta { font-size: 12px; color: var(--stone-light); }
+.hist-conf { margin-left: auto; text-align: right; }
+.hist-conf-val { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 600; color: var(--forest); }
+.hist-conf-label { font-size: 10px; color: var(--stone-light); text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* Loading spinner */
+.spinner-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem; }
+.spinner {
+  width: 40px; height: 40px; border: 3px solid var(--cream2);
+  border-top-color: var(--forest); border-radius: 50%;
+  animation: spin 0.8s linear infinite; margin-bottom: 1rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner-label { font-size: 13px; color: var(--stone-light); font-style: italic; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 2rem; right: 2rem;
+  background: var(--forest); color: white;
+  padding: 12px 20px; border-radius: 12px;
+  font-size: 14px; font-weight: 500;
+  transform: translateY(100px); opacity: 0;
+  transition: all 0.3s; z-index: 999;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero { grid-template-columns: 1fr; }
+  .hero-visual { height: 280px; }
+  .features-grid { grid-template-columns: 1fr 1fr; }
+  .stats-bar { grid-template-columns: 1fr 1fr; }
+  .auth-page { grid-template-columns: 1fr; }
+  .auth-visual { display: none; }
+  .upload-grid, .vet-layout, .dir-layout { grid-template-columns: 1fr; }
+  .tab-row { padding: 0 1rem; }
+  .dash-header { padding: 1.5rem 1rem 0; }
+  .dash-content { padding: 0 1rem 2rem; }
+  .testimonial-section { grid-template-columns: 1fr; }
+}
+
+/* Animations */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.fade-in { animation: fadeIn 0.5s ease forwards; }
+
+/* Severity indicator */
+.severity-row { display: flex; gap: 6px; margin: 0.8rem 0; }
+.sev-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--cream2); }
+.sev-dot.active.low { background: #5A8F3C; }
+.sev-dot.active.med { background: #E8A020; }
+.sev-dot.active.high { background: var(--rust); }
+
+/* Map placeholder when no search */
+.map-placeholder {
+  height: 400px; background: #d4e7e0; border-radius: 16px;
+  border: 1px solid var(--border); display: flex; align-items: center;
+  justify-content: center; color: var(--stone-light); flex-direction: column; gap: 8px;
+}
+
+/* No results */
+.no-results { text-align: center; padding: 2rem; color: var(--stone-light); font-size: 14px; }
+
+</style>
+</head>
+<body>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav class="navbar" id="navbar">
+  <div class="nav-brand" onclick="goHome()">
+    <div class="nav-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/>
+        <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+        <line x1="9" y1="9" x2="9.01" y2="9"/>
+        <line x1="15" y1="9" x2="15.01" y2="9"/>
+      </svg>
+    </div>
+    <span id="brand-name">PashuSetu</span>
+  </div>
+  <div class="nav-right">
+    <span class="nav-link" id="nav-dashboard" onclick="showPage('dashboard')" style="display:none" data-en="Dashboard" data-hi="डैशबोर्ड">Dashboard</span>
+    <span class="nav-link" id="nav-history" onclick="showPage('history')" style="display:none" data-en="History" data-hi="इतिहास">History</span>
+    <button class="lang-toggle" onclick="toggleLang()" id="lang-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>
+      <span id="lang-label">EN</span>
+    </button>
+    <button class="btn-signin" id="nav-signin" onclick="showPage('login')" data-en="Sign In" data-hi="साइन इन">Sign In</button>
+    <button class="btn-signout" id="nav-signout" style="display:none" onclick="signOut()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <span data-en="Sign Out" data-hi="साइन आउट">Sign Out</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ═══ TOAST ═══ -->
+<div class="toast" id="toast"></div>
+
+<!-- ══════════════════════════════════════
+     LANDING PAGE
+══════════════════════════════════════ -->
+<div class="page active" id="page-landing">
+  <div class="hero">
+    <div>
+      <div class="hero-eyebrow" data-en="PASHUSETU · INDIA" data-hi="पशुसेतु · भारत">PASHUSETU · INDIA</div>
+      <h1 class="hero-title" data-en="Cattle Wisdom,<br>Within Reach" data-hi="पशुपालन ज्ञान,<br>आपकी पहुँच में">Cattle Wisdom,<br>Within Reach</h1>
+      <p class="hero-sub" data-en="AI-powered breed recognition, disease detection, and verified veterinary care — built for India's livestock keepers." data-hi="AI-संचालित नस्ल पहचान, रोग पहचान और सत्यापित पशु चिकित्सा देखभाल — भारत के पशुपालकों के लिए।">AI-powered breed recognition, disease detection, and verified veterinary care — built for India's livestock keepers.</p>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="showPage('register')">
+          <span data-en="Get Started" data-hi="शुरू करें">Get Started</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+        <button class="btn-outline" onclick="showPage('login')" data-en="Sign In" data-hi="साइन इन">Sign In</button>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-img-wrap">
+        <div style="width:100%;height:100%;background:linear-gradient(160deg,#2C4A2E 0%,#4A7A4D 30%,#8BA888 65%,#C8D8A0 100%);"></div>
+      </div>
+      <div class="hero-card-float">
+        <div class="hcf-label" data-en="DETECTED" data-hi="पहचाना गया">DETECTED</div>
+        <div class="hcf-value">Gir Cow</div>
+        <div class="hcf-bar"><div class="hcf-fill"></div></div>
+        <div class="hcf-conf">94% confidence</div>
+      </div>
+      <div class="hero-badge">
+        <div class="hb-num"></div>
+        <div class="hb-label" data-en="" data-hi="स्थितियाँ"><br></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <div class="features-section">
+    <div class="sec-eyebrow" data-en="FEATURES" data-hi="विशेषताएं">FEATURES</div>
+    <div class="sec-title" data-en="One companion, four powers." data-hi="एक साथी, चार शक्तियाँ।">One companion, four powers.</div>
+    <div class="features-grid">
+      <div class="feat-card" onclick="demoLogin()">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2C4A2E" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </div>
+        <div class="feat-name" data-en="Breed AI" data-hi="नस्ल AI">Breed AI</div>
+        <div class="feat-desc" data-en="Identify 20 indigenous & exotic cattle/buffalo breeds instantly." data-hi="20 देशी और विदेशी गाय/भैंस की नस्लों की तुरंत पहचान।">Identify 20 indigenous & exotic cattle/buffalo breeds instantly.</div>
+      </div>
+      <div class="feat-card" onclick="demoLogin()">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#C4714A" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <div class="feat-name" data-en="Disease Watch" data-hi="रोग निगरानी">Disease Watch</div>
+        <div class="feat-desc" data-en="Detect FMD, Lumpy Skin or healthy state from a single photo." data-hi="एक फोटो से FMD, लम्पी स्किन या स्वस्थ अवस्था का पता लगाएं।">Detect FMD, Lumpy Skin or healthy state from a single photo.</div>
+      </div>
+      <div class="feat-card" onclick="demoLogin()">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2C4A2E" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <div class="feat-name" data-en="Vet Network" data-hi="पशु चिकित्सक नेटवर्क">Vet Network</div>
+        <div class="feat-desc" data-en="Locate verified veterinarians around your village or city." data-hi="अपने गांव या शहर के आसपास सत्यापित पशु चिकित्सकों का पता लगाएं।">Locate verified veterinarians around your village or city.</div>
+      </div>
+      <div class="feat-card" onclick="demoLogin()">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#8BA888" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        </div>
+        <div class="feat-name" data-en="Knowledge" data-hi="ज्ञान">Knowledge</div>
+        <div class="feat-desc" data-en="Deep breed insights — yield, climate fit, traits, history." data-hi="गहरी नस्ल जानकारी — दूध उत्पादन, जलवायु, लक्षण, इतिहास।">Deep breed insights — yield, climate fit, traits, history.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div><div class="stat-num">20+</div><div class="stat-label" data-en="Breeds Recognized" data-hi="पहचानी जाने वाली नस्लें">Breeds Recognized</div></div>
+    <div><div class="stat-num">3</div><div class="stat-label" data-en="Disease Classes" data-hi="रोग वर्ग">Disease Classes</div></div>
+    <div><div class="stat-num">EN/HI</div><div class="stat-label" data-en="Bilingual Support" data-hi="द्विभाषी समर्थन">Bilingual Support</div></div>
+    <div><div class="stat-num">OSM</div><div class="stat-label" data-en="Open Vet Map" data-hi="खुला पशु चिकित्सक नक्शा">Open Vet Map</div></div>
+  </div>
+
+  <!-- Testimonials -->
+  <div class="testimonial-section">
+    <div class="testi-card">
+      <div class="testi-quote">"PashuMitra ne meri Gir gaay ki nasha pehchaan ki aur bataya ki woh FMD se peedit hai. Doctor ko bulane se pehle hi dawa shuru ho gayi."</div>
+      <div class="testi-author">
+        <div class="testi-avatar">🧑‍🌾</div>
+        <div>
+          <div class="testi-name">Ramesh Yadav</div>
+          <div class="testi-place">Anand, Gujarat</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-quote">"The breed directory helped me understand the milk yield difference between my Murrah buffalo and a Surti. Excellent guidance for dairy decisions."</div>
+      <div class="testi-author">
+        <div class="testi-avatar">👩‍🌾</div>
+        <div>
+          <div class="testi-name">Priya Deshpande</div>
+          <div class="testi-place">Pune, Maharashtra</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="land-footer">
+    <strong>PashuMitra</strong> — Built with care for India's 300 million livestock keepers.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     LOGIN PAGE
+══════════════════════════════════════ -->
+<div class="page" id="page-login">
+  <div class="auth-page">
+    <div class="auth-visual">
+      <div class="av-eyebrow">PASHUMITRA</div>
+      <div class="av-title">Cattle Wisdom,<br>Within Reach</div>
+      <div class="av-sub">AI-powered breed recognition, disease detection, and verified veterinary care — built for India's livestock keepers.</div>
+    </div>
+    <div class="auth-form-wrap">
+      <div class="auth-logo">
+        <div class="nav-logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+        <span>PashuMitra</span>
+      </div>
+      <div class="auth-form">
+        <div class="auth-eyebrow" data-en="WELCOME BACK" data-hi="वापस स्वागत है">WELCOME BACK</div>
+        <div class="auth-title" data-en="Sign In" data-hi="साइन इन">Sign In</div>
+        <label class="field-label" data-en="EMAIL" data-hi="ईमेल">EMAIL</label>
+        <input class="field-input" type="email" id="login-email" placeholder="you@example.com">
+        <label class="field-label" data-en="PASSWORD" data-hi="पासवर्ड">PASSWORD</label>
+        <input class="field-input" type="password" id="login-pwd" placeholder="••••••••">
+        <button class="btn-full" onclick="doLogin()" data-en="Sign In" data-hi="साइन इन">Sign In</button>
+        <div class="auth-switch">
+          <span data-en="New to PashuMitra?" data-hi="PashuMitra पर नए हैं?">New to PashuMitra?</span>
+          <a onclick="showPage('register')" data-en=" Create Account" data-hi=" खाता बनाएं"> Create Account</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     REGISTER PAGE
+══════════════════════════════════════ -->
+<div class="page" id="page-register">
+  <div class="auth-page">
+    <div class="auth-visual">
+      <div class="av-eyebrow">PASHUMITRA</div>
+      <div class="av-title">Join India's Cattle Community</div>
+      <div class="av-sub">Get access to AI breed recognition, disease detection, and a network of verified veterinarians near you.</div>
+    </div>
+    <div class="auth-form-wrap">
+      <div class="auth-logo">
+        <div class="nav-logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+        <span>PashuMitra</span>
+      </div>
+      <div class="auth-form">
+        <div class="auth-eyebrow">CREATE ACCOUNT</div>
+        <div class="auth-title">Get Started</div>
+        <label class="field-label">NAME</label>
+        <input class="field-input" type="text" id="reg-name" placeholder="Your name">
+        <label class="field-label">EMAIL</label>
+        <input class="field-input" type="email" id="reg-email" placeholder="you@example.com">
+        <label class="field-label">PASSWORD</label>
+        <input class="field-input" type="password" id="reg-pwd" placeholder="Min 6 characters">
+        <button class="btn-full" onclick="doRegister()">Create Account</button>
+        <div class="auth-switch">Already have an account? <a onclick="showPage('login')">Sign In</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     DASHBOARD
+══════════════════════════════════════ -->
+<div class="page" id="page-dashboard">
+  <div class="dash-header">
+    <div class="dash-eyebrow" data-en="DASHBOARD" data-hi="डैशबोर्ड">DASHBOARD</div>
+    <div class="dash-title">Welcome back, <span id="user-name">Friend</span></div>
+  </div>
+  <div class="tab-row">
+    <button class="tab-btn active" onclick="switchTab('breed-rec')" id="tab-breed-rec">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span data-en="Breed Recognition" data-hi="नस्ल पहचान">Breed Recognition</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('breed-dir')" id="tab-breed-dir">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <span data-en="Breed Directory" data-hi="नस्ल निर्देशिका">Breed Directory</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('disease')" id="tab-disease">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <span data-en="Disease Detection" data-hi="रोग पहचान">Disease Detection</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('vet')" id="tab-vet">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span data-en="Find a Vet" data-hi="पशु चिकित्सक खोजें">Find a Vet</span>
+    </button>
+  </div>
+  <div class="dash-content">
+
+    <!-- BREED RECOGNITION TAB -->
+    <div class="tab-panel active" id="panel-breed-rec">
+      <div class="upload-grid">
+        <div>
+          <div class="step-label" data-en="STEP 1" data-hi="चरण 1">STEP 1</div>
+          <div class="panel-title" data-en="Breed Recognition" data-hi="नस्ल पहचान">Breed Recognition</div>
+          <div class="panel-sub" data-en="Upload a clear photo of your cattle / buffalo. Our AI identifies the breed instantly with confidence scoring across 20 indigenous & exotic breeds." data-hi="अपनी गाय/भैंस की स्पष्ट फोटो अपलोड करें। हमारा AI 20 देशी और विदेशी नस्लों में से नस्ल तुरंत पहचानता है।">Upload a clear photo of your cattle / buffalo. Our AI identifies the breed instantly with confidence scoring across 20 indigenous &amp; exotic breeds.</div>
+          <div class="drop-zone" id="dz-breed" ondragover="dzDrag(event,'dz-breed')" ondragleave="dzLeave('dz-breed')" ondrop="dzDrop(event,'dz-breed','breed')">
+            <input type="file" accept="image/*" onchange="fileSelected(this,'breed')">
+            <img class="preview-img" id="prev-breed" alt="preview">
+            <div class="dz-icon" id="dz-icon-breed">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#8BA888" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
+            <div id="dz-title-breed" class="dz-title" data-en="Upload an image" data-hi="छवि अपलोड करें">Upload an image</div>
+            <div id="dz-sub-breed" class="dz-sub" data-en="Drag & drop or click to browse · JPG, PNG" data-hi="खींचें और छोड़ें या ब्राउज़ करें · JPG, PNG">Drag &amp; drop or click to browse · JPG, PNG</div>
+          </div>
+          <button class="btn-analyze" id="btn-breed" onclick="analyzeImage('breed')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span data-en="Analyze" data-hi="विश्लेषण करें">Analyze</span>
+          </button>
+        </div>
+        <div class="result-panel" id="rp-breed">
+          <div class="rp-placeholder">
+            <div class="rp-placeholder-icon">🔍</div>
+            <div class="rp-placeholder-title" data-en="Your result will appear here" data-hi="आपका परिणाम यहाँ दिखेगा">Your result will appear here</div>
+            <div class="rp-placeholder-sub" data-en="Upload an image and tap Analyze to identify the breed." data-hi="नस्ल पहचानने के लिए छवि अपलोड करें और Analyze दबाएं।">Upload an image and tap Analyze to identify the breed.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BREED DIRECTORY TAB -->
+    <div class="tab-panel" id="panel-breed-dir">
+      <div class="dir-layout">
+        <div class="dir-sidebar">
+          <div class="dir-search">
+            <div class="dir-search-wrap">
+              <input class="dir-search-input" type="text" id="dir-search" placeholder="Select a breed to explore" oninput="filterBreeds(this.value)">
+            </div>
+          </div>
+          <div class="dir-list" id="dir-list"></div>
+        </div>
+        <div class="dir-detail" id="dir-detail">
+          <div style="text-align:center;padding:3rem;color:var(--stone-light)">
+            <div style="font-size:2rem;margin-bottom:0.8rem">📖</div>
+            <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--stone)">Select a breed to explore</div>
+            <div style="font-size:13px;margin-top:0.4rem">Click any breed from the list to see detailed information.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DISEASE DETECTION TAB -->
+    <div class="tab-panel" id="panel-disease">
+      <div class="upload-grid">
+        <div>
+          <div class="step-label" data-en="STEP 1" data-hi="चरण 1">STEP 1</div>
+          <div class="panel-title" data-en="Disease Detection" data-hi="रोग पहचान">Disease Detection</div>
+          <div class="panel-sub" data-en="Upload a photo focused on the animal's skin or mouth area. The AI screens for Foot & Mouth Disease, Lumpy Skin Disease, or healthy condition." data-hi="जानवर की त्वचा या मुंह के क्षेत्र पर केंद्रित फोटो अपलोड करें। AI FMD, Lumpy Skin या स्वस्थ अवस्था की जांच करता है।">Upload a photo focused on the animal's skin or mouth area. The AI screens for Foot &amp; Mouth Disease, Lumpy Skin Disease, or healthy condition.</div>
+          <div class="drop-zone" id="dz-disease" ondragover="dzDrag(event,'dz-disease')" ondragleave="dzLeave('dz-disease')" ondrop="dzDrop(event,'dz-disease','disease')">
+            <input type="file" accept="image/*" onchange="fileSelected(this,'disease')">
+            <img class="preview-img" id="prev-disease" alt="preview">
+            <div class="dz-icon" id="dz-icon-disease">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#C4714A" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </div>
+            <div id="dz-title-disease" class="dz-title" data-en="Upload an image" data-hi="छवि अपलोड करें">Upload an image</div>
+            <div id="dz-sub-disease" class="dz-sub" data-en="Drag & drop or click to browse · JPG, PNG" data-hi="खींचें और छोड़ें या ब्राउज़ करें · JPG, PNG">Drag &amp; drop or click to browse · JPG, PNG</div>
+          </div>
+          <button class="btn-analyze" id="btn-disease" onclick="analyzeImage('disease')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            <span data-en="Analyze" data-hi="विश्लेषण करें">Analyze</span>
+          </button>
+        </div>
+        <div class="result-panel" id="rp-disease">
+          <div class="rp-placeholder">
+            <div class="rp-placeholder-icon">🩺</div>
+            <div class="rp-placeholder-title" data-en="Health screen will appear here" data-hi="स्वास्थ्य स्क्रीन यहाँ दिखेगी">Health screen will appear here</div>
+            <div class="rp-placeholder-sub" data-en="Upload an image and tap Analyze to screen for disease." data-hi="रोग की जांच के लिए छवि अपलोड करें और Analyze दबाएं।">Upload an image and tap Analyze to screen for disease.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VET FINDER TAB -->
+    <div class="tab-panel" id="panel-vet">
+      <div class="dash-eyebrow" style="margin-bottom:0.4rem" data-en="CARE NETWORK" data-hi="देखभाल नेटवर्क">CARE NETWORK</div>
+      <div class="panel-title" style="margin-bottom:0.5rem" data-en="Find a Veterinarian Near You" data-hi="अपने पास पशु चिकित्सक खोजें">Find a Veterinarian Near You</div>
+      <div class="panel-sub" data-en="Enable location or enter your address to discover trusted vet clinics nearby." data-hi="नजदीकी पशु चिकित्सक क्लीनिक खोजने के लिए स्थान सक्षम करें या अपना पता दर्ज करें।">Enable location or enter your address to discover trusted vet clinics nearby.</div>
+
+      <div class="vet-search-box">
+        <div class="vet-input-wrap">
+          <input class="vet-input" type="text" id="vet-addr" placeholder="Enter address or city" onkeydown="if(event.key==='Enter')searchVets()">
+        </div>
+        <button class="btn-search" onclick="searchVets()" data-en="Search" data-hi="खोजें">Search</button>
+        <button class="btn-location" onclick="useMyLocation()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg>
+          <span data-en="Use my location" data-hi="मेरी स्थिति">Use my location</span>
+        </button>
+      </div>
+
+      <div class="vet-layout">
+        <div>
+          <div id="map-wrap">
+            <div class="map-placeholder">
+              <div style="font-size:1.8rem">🗺️</div>
+              <div style="font-size:14px">Search to load map</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div id="vet-results">
+            <div class="vet-start-prompt">
+              <div class="vsp-icon">📍</div>
+              <div class="vsp-title" data-en="Begin your search" data-hi="खोज शुरू करें">Begin your search</div>
+              <div class="vsp-sub" data-en="Use your location or enter an address to discover veterinarians." data-hi="पशु चिकित्सकों को खोजने के लिए अपना स्थान उपयोग करें या पता दर्ज करें।">Use your location or enter an address to discover veterinarians.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end dash-content -->
+</div><!-- end dashboard -->
+
+<!-- ══════════════════════════════════════
+     HISTORY PAGE
+══════════════════════════════════════ -->
+<div class="page" id="page-history">
+  <div class="history-wrap">
+    <div class="dash-eyebrow" data-en="HISTORY" data-hi="इतिहास">HISTORY</div>
+    <div class="hist-title" data-en="Your Checks" data-hi="आपकी जांच">Your Checks</div>
+    <div class="hist-sub" data-en="Past breed and disease analyses" data-hi="पिछली नस्ल और रोग जांच">Past breed and disease analyses</div>
+    <div class="hist-list" id="hist-list">
+      <div class="no-results" data-en="No history yet. Run your first analysis!" data-hi="अभी कोई इतिहास नहीं। अपना पहला विश्लेषण चलाएं!">No history yet. Run your first analysis!</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let currentLang = 'en';
+let currentUser = null;
+let users = JSON.parse(localStorage.getItem('pm_users') || '{}');
+let history = JSON.parse(localStorage.getItem('pm_history') || '[]');
+let mapInstance = null;
+let selectedBreedFile = null;
+let selectedDiseaseFile = null;
+let currentPage = 'landing';
+
+// ═══════════════════════════════════════════
+//  BREED DATA
+// ═══════════════════════════════════════════
+const BREEDS = [
+  { name:"Alambadi", hindi:"अलंबाडी", type:"Cattle", region:"Tamil Nadu (India)", climate:"Hot, dry, semi-arid", milkYield:"1–2 L/day", milkFat:"4%", traits:"Grey, long horns, sturdy", utility:"Draught", crossbreeding:"Limited", special:"Strong draught breed of South India" },
+  { name:"Amritmahal", hindi:"अमृतमहल", type:"Cattle", region:"Karnataka (India)", climate:"Tropical, semi-arid", milkYield:"1–3 L/day", milkFat:"4.5%", traits:"White/grey, fierce, V-shaped horns", utility:"Draught", crossbreeding:"Not recommended", special:"Famous military cattle of Mysore" },
+  { name:"Ayrshire", hindi:"एयरशायर", type:"Exotic Cattle", region:"Scotland (UK)", climate:"Temperate", milkYield:"15–20 L/day", milkFat:"3.9%", traits:"Red-white spotted, medium frame", utility:"Dairy", crossbreeding:"Common with zebu", special:"High milk volume with good butterfat" },
+  { name:"Banni Buffalo", hindi:"बन्नी भैंस", type:"Buffalo", region:"Kutch, Gujarat (India)", climate:"Arid, desert-edge", milkYield:"8–12 L/day", milkFat:"7.5%", traits:"Jet-black, curved horns", utility:"Dairy + Draught", crossbreeding:"Purebred preferred", special:"Extreme heat-tolerant dairy buffalo" },
+  { name:"Bargur", hindi:"बड़गूर", type:"Cattle", region:"Tamil Nadu (India)", climate:"Semi-arid, hilly", milkYield:"1–2 L/day", milkFat:"4%", traits:"Brown with white patches, agile", utility:"Draught", crossbreeding:"Rare", special:"Excellent hill terrain animal" },
+  { name:"Bhadawari Buffalo", hindi:"भदावरी भैंस", type:"Buffalo", region:"UP-MP border (India)", climate:"Sub-tropical", milkYield:"6–8 L/day", milkFat:"8%", traits:"Copper-brown, short legs", utility:"Dairy", crossbreeding:"Limited", special:"Highest milk fat among buffalo breeds" },
+  { name:"Brown Swiss", hindi:"ब्राउन स्विस", type:"Exotic Cattle", region:"Switzerland", climate:"Alpine, temperate", milkYield:"18–24 L/day", milkFat:"4.0%", traits:"Brown, large frame, calm", utility:"Dual purpose", crossbreeding:"Common in tropics", special:"A2 milk with excellent protein content" },
+  { name:"Dangi", hindi:"डांगी", type:"Cattle", region:"Maharashtra (India)", climate:"Humid, heavy rainfall", milkYield:"2–4 L/day", milkFat:"4.5%", traits:"Black or red-pied, short legs", utility:"Draught + Dairy", crossbreeding:"Limited", special:"Best suited for high-rainfall forest areas" },
+  { name:"Gir", hindi:"गीर", type:"Cattle", region:"Saurashtra, Gujarat (India)", climate:"Dry, tropical", milkYield:"8–15 L/day", milkFat:"4.5%", traits:"Spotted red, convex forehead, curved horns", utility:"Dairy", crossbreeding:"Yes (Brazil)", special:"One of India's best dairy breeds; used globally" },
+  { name:"Hallikar", hindi:"हल्लीकर", type:"Cattle", region:"Karnataka (India)", climate:"Semi-arid, tropical", milkYield:"1–3 L/day", milkFat:"4.5%", traits:"White-grey, long upward horns", utility:"Draught", crossbreeding:"Limited", special:"Speed and endurance draught breed" },
+  { name:"Hariana", hindi:"हरियाणा", type:"Cattle", region:"Haryana (India)", climate:"Sub-tropical, semi-arid", milkYield:"6–10 L/day", milkFat:"4%", traits:"White, medium size, fine build", utility:"Dual purpose", crossbreeding:"Common", special:"Balanced draught and dairy" },
+  { name:"Holstein Friesian", hindi:"होल्स्टीन फ्रीजियन", type:"Exotic Cattle", region:"Netherlands", climate:"Temperate", milkYield:"25–40 L/day", milkFat:"3.5%", traits:"Black-white, large, high producer", utility:"Dairy", crossbreeding:"Very common globally", special:"World's highest milk-producing breed" },
+  { name:"Jersey", hindi:"जर्सी", type:"Exotic Cattle", region:"Jersey Island (UK)", climate:"Temperate", milkYield:"15–25 L/day", milkFat:"5–6%", traits:"Fawn/brown, dainty, large eyes", utility:"Dairy", crossbreeding:"Common in tropics", special:"Highest fat % among dairy breeds" },
+  { name:"Kangayam", hindi:"कंगायम", type:"Cattle", region:"Tamil Nadu (India)", climate:"Dry, hot", milkYield:"2–4 L/day", milkFat:"4%", traits:"Grey-white, compact, U-shaped horns", utility:"Dual purpose", crossbreeding:"Limited", special:"Resilient to drought conditions" },
+  { name:"Murrah Buffalo", hindi:"मुर्रा भैंस", type:"Buffalo", region:"Haryana/Punjab (India)", climate:"Sub-tropical", milkYield:"12–20 L/day", milkFat:"7%", traits:"Jet-black, tightly-coiled horns", utility:"Dairy", crossbreeding:"Yes", special:"World's best dairy buffalo; huge export demand" },
+  { name:"Ongole", hindi:"ओंगोल", type:"Cattle", region:"Andhra Pradesh (India)", climate:"Tropical, semi-arid", milkYield:"3–5 L/day", milkFat:"4.5%", traits:"White-grey, large hump, massive build", utility:"Dual purpose", crossbreeding:"Yes (Brahman USA)", special:"Ancestor of Brahman breed; heat-tolerant" },
+  { name:"Punganur", hindi:"पुंगनूर", type:"Cattle", region:"Andhra Pradesh (India)", climate:"Dry, hot", milkYield:"3–5 L/day", milkFat:"8%", traits:"Tiny, light brown, smallest cattle breed", utility:"Dairy + Draught", crossbreeding:"Rare", special:"World's smallest cattle; extremely high milk fat" },
+  { name:"Rathi", hindi:"राठी", type:"Cattle", region:"Rajasthan (India)", climate:"Arid, desert", milkYield:"8–12 L/day", milkFat:"4.5%", traits:"Brown, medium size", utility:"Dairy", crossbreeding:"Limited", special:"Desert dairy breed; excellent heat tolerance" },
+  { name:"Sahiwal", hindi:"साहीवाल", type:"Cattle", region:"Punjab (India/Pakistan)", climate:"Sub-tropical, semi-arid", milkYield:"10–16 L/day", milkFat:"4.5%", traits:"Red-brown, heavy, loose skin", utility:"Dairy", crossbreeding:"Yes (Africa, Caribbean)", special:"Best indigenous dairy breed; tick-resistant" },
+  { name:"Surti Buffalo", hindi:"सूरती भैंस", type:"Buffalo", region:"Gujarat (India)", climate:"Tropical", milkYield:"8–12 L/day", milkFat:"7.5%", traits:"White/silver, medium size", utility:"Dairy", crossbreeding:"Limited", special:"Named after Surat; good in humid conditions" },
+];
+
+// ═══════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  currentPage = id;
+  window.scrollTo(0, 0);
+
+  const loggedIn = !!currentUser;
+  document.getElementById('nav-dashboard').style.display = loggedIn ? '' : 'none';
+  document.getElementById('nav-history').style.display = loggedIn ? '' : 'none';
+  document.getElementById('nav-signin').style.display = loggedIn ? 'none' : '';
+  document.getElementById('nav-signout').style.display = loggedIn ? '' : 'none';
+
+  if (id === 'history') renderHistory();
+  if (id === 'dashboard') renderDirList(BREEDS);
+  applyLang();
+}
+
+function goHome() {
+  showPage(currentUser ? 'dashboard' : 'landing');
+}
+
+// ═══════════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════════
+function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pwd = document.getElementById('login-pwd').value;
+  if (!email || !pwd) { showToast('Please fill all fields'); return; }
+  if (users[email] && users[email].password === pwd) {
+    currentUser = { email, name: users[email].name };
+    afterLogin();
+  } else if (email && pwd.length >= 3) {
+    // demo: create on the fly
+    if (!users[email]) users[email] = { password: pwd, name: email.split('@')[0] };
+    localStorage.setItem('pm_users', JSON.stringify(users));
+    currentUser = { email, name: users[email].name };
+    afterLogin();
+  } else {
+    showToast('Invalid credentials');
+  }
+}
+
+function doRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pwd = document.getElementById('reg-pwd').value;
+  if (!name || !email || !pwd) { showToast('Please fill all fields'); return; }
+  if (pwd.length < 6) { showToast('Password must be 6+ characters'); return; }
+  users[email] = { password: pwd, name };
+  localStorage.setItem('pm_users', JSON.stringify(users));
+  currentUser = { email, name };
+  afterLogin();
+}
+
+function demoLogin() {
+  currentUser = { email: 'demo@pashumitra.in', name: 'Demo' };
+  afterLogin();
+}
+
+function afterLogin() {
+  document.getElementById('user-name').textContent = currentUser.name;
+  showPage('dashboard');
+  showToast('Welcome back, ' + currentUser.name + '!');
+}
+
+function signOut() {
+  currentUser = null;
+  showPage('landing');
+  showToast('Signed out successfully');
+}
+
+// ═══════════════════════════════════════════
+//  DASHBOARD TABS
+// ═══════════════════════════════════════════
+function switchTab(id) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  document.getElementById('panel-' + id).classList.add('active');
+}
+
+// ═══════════════════════════════════════════
+//  DROP ZONE
+// ═══════════════════════════════════════════
+function dzDrag(e, id) { e.preventDefault(); document.getElementById(id).classList.add('drag'); }
+function dzLeave(id) { document.getElementById(id).classList.remove('drag'); }
+function dzDrop(e, dzId, type) {
+  e.preventDefault();
+  dzLeave(dzId);
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file, type);
+}
+function fileSelected(inp, type) {
+  if (inp.files[0]) handleFile(inp.files[0], type);
+}
+function handleFile(file, type) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const prev = document.getElementById('prev-' + type);
+    prev.src = ev.target.result;
+    prev.style.display = 'block';
+    document.getElementById('dz-icon-' + type).style.display = 'none';
+    document.getElementById('dz-title-' + type).style.display = 'none';
+    document.getElementById('dz-sub-' + type).style.display = 'none';
+    document.getElementById('btn-' + type).classList.add('ready');
+  };
+  reader.readAsDataURL(file);
+  if (type === 'breed') selectedBreedFile = file;
+  else selectedDiseaseFile = file;
+}
+
+// ═══════════════════════════════════════════
+//  BREED RECOGNITION (simulate model)
+// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════
+// ✅ REAL AI INTEGRATION (Backend Connected)
+// ═══════════════════════════════════════════
+
+async function analyzeImage(type) {
+  let file = null;
+
+  if (type === "breed") {
+    file = selectedBreedFile;
+  } else if (type === "disease") {
+    file = selectedDiseaseFile;
+  }
+
+  if (!file) {
+    showToast("Please upload an image first");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const resultBox = document.getElementById(
+    type === "breed" ? "rp-breed" : "rp-disease"
+  );
+
+  // 🔄 Loading UI
+  resultBox.innerHTML = `
+    <div class="spinner-wrap">
+      <div class="spinner"></div>
+      <div class="spinner-label">
+        ${type === "breed" ? "Identifying breed…" : "Screening for disease…"}
+      </div>
+    </div>
+  `;
+
+  try {
+    const response = await fetch("http://127.0.0.1:5000/predict", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await response.json();
+
+    // 🐄 BREED RESULT
+    if (type === "breed") {
+      resultBox.innerHTML = `
+        <div class="result-card fade-in">
+          <div class="rc-tag breed">BREED DETECTED</div>
+          <div class="rc-name">${data.breed}</div>
+          <div class="rc-sub">Confidence: ${(data.breed_conf * 100).toFixed(2)}%</div>
+        </div>
+      `;
+    }
+
+    // 🦠 DISEASE RESULT
+    else {
+      const isHealthy = data.disease === "healthy";
+
+      resultBox.innerHTML = `
+        <div class="result-card fade-in">
+          <div class="rc-tag ${isHealthy ? "healthy" : "disease"}">
+            ${isHealthy ? "HEALTHY" : "DISEASE DETECTED"}
+          </div>
+          <div class="rc-name">${data.disease}</div>
+          <div class="rc-sub">Confidence: ${(data.disease_conf * 100).toFixed(2)}%</div>
+
+          ${
+            isHealthy
+              ? `<div style="background:rgba(44,74,46,0.08);border:1px solid rgba(44,74,46,0.2);border-radius:12px;padding:1rem;margin-top:1rem;font-size:12px;color:var(--forest)">
+                  ✅ Continue routine care. Animal appears healthy.
+                </div>`
+              : `<div class="care-box">
+                  <h4>⚠️ Recommended Action</h4>
+                  <p>Isolate the animal and contact a veterinarian immediately.</p>
+                </div>`
+          }
+        </div>
+      `;
+    }
+
+  } catch (error) {
+    console.error(error);
+    showToast("❌ Error connecting to backend");
+  }
+}
+
+// ═══════════════════════════════════════════
+//  BREED DIRECTORY
+// ═══════════════════════════════════════════
+function renderDirList(list) {
+  const el = document.getElementById('dir-list');
+  el.innerHTML = list.map((b, i) => `
+    <div class="dir-item" id="di-${i}" onclick="showBreedDetail(${i})">
+      <div class="di-name">${b.name}</div>
+      <div class="di-sub">${b.type} · ${b.region}</div>
+    </div>`).join('');
+}
+
+function filterBreeds(q) {
+  const filtered = BREEDS.filter(b =>
+    b.name.toLowerCase().includes(q.toLowerCase()) ||
+    b.region.toLowerCase().includes(q.toLowerCase()) ||
+    b.type.toLowerCase().includes(q.toLowerCase())
+  );
+  renderDirList(filtered);
+}
+
+function showBreedDetail(idx) {
+  document.querySelectorAll('.dir-item').forEach(d => d.classList.remove('active'));
+  const items = document.querySelectorAll('.dir-item');
+  if(items[idx]) items[idx].classList.add('active');
+
+  const b = BREEDS[idx];
+  if(!b) return;
+  document.getElementById('dir-detail').innerHTML = `
+    <div class="fade-in">
+      <div class="dd-type">${b.type.toUpperCase()}</div>
+      <div class="dd-name">${b.name}</div>
+      <div class="dd-hindi">${b.hindi}</div>
+      <div class="dd-region">${b.region}</div>
+      <div class="dd-grid">
+        <div>
+          <div class="dd-field-label">CLIMATE</div>
+          <div class="dd-field-val-sm">${b.climate}</div>
+        </div>
+        <div>
+          <div class="dd-field-label">MILK YIELD</div>
+          <div class="dd-field-val">${b.milkYield}</div>
+        </div>
+        <div>
+          <div class="dd-field-label">MILK FAT</div>
+          <div class="dd-field-val">${b.milkFat}</div>
+        </div>
+        <div>
+          <div class="dd-field-label">UTILITY</div>
+          <div class="dd-field-val-sm">${b.utility}</div>
+        </div>
+        <div>
+          <div class="dd-field-label">PHYSICAL TRAITS</div>
+          <div class="dd-field-val-sm">${b.traits}</div>
+        </div>
+        <div>
+          <div class="dd-field-label">CROSSBREEDING</div>
+          <div class="dd-field-val-sm">${b.crossbreeding}</div>
+        </div>
+      </div>
+      <div class="dd-special">
+        <div class="dd-special-label">SPECIAL FEATURES</div>
+        <div class="dd-special-val">${b.special}</div>
+      </div>
+    </div>`;
+}
+
+
+// ═══════════════════════════════════════════
+//  VET FINDER
+// ═══════════════════════════════════════════
+function searchVets() {
+  const addr = document.getElementById('vet-addr').value.trim();
+  if (!addr) { showToast('Enter a city or address'); return; }
+  geocodeAndLoad(addr);
+}
+
+function useMyLocation() {
+  if (!navigator.geolocation) { showToast('Geolocation not supported'); return; }
+  showToast('Getting your location…');
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+
+      console.log("User location:", lat, lng); // debug
+      loadMapAt(lat, lng, "Your Location");
+    },
+    err => {
+      console.error(err);
+      showToast("Location access denied. Please allow location permission.");
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    }
+    );
+
+}
+
+function geocodeAndLoad(query) {
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`;
+  fetch(url)
+    .then(r => r.json())
+    .then(data => {
+      if (!data.length) { showToast('Location not found. Try a different query.'); return; }
+      loadMapAt(parseFloat(data[0].lat), parseFloat(data[0].lon), data[0].display_name);
+    })
+    .catch(() => showToast('Network error. Check your connection.'));
+}
+
+function loadMapAt(lat, lng, label) {
+  const wrap = document.getElementById('map-wrap');
+  wrap.innerHTML = '<div id="map"></div>';
+
+  if (mapInstance) { mapInstance.remove(); mapInstance = null; }
+
+  mapInstance = L.map('map').setView([lat, lng], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
+  }).addTo(mapInstance);
+
+  // User marker
+  L.circleMarker([lat, lng], { radius: 8, color: '#2C4A2E', fillColor: '#5A8A5D', fillOpacity: 1, weight: 2 })
+    .addTo(mapInstance).bindPopup('📍 ' + (label.length > 40 ? label.substring(0,40)+'…' : label));
+
+  fetchNearbyVets(lat, lng);
+}
+
+function fetchNearbyVets(lat, lng) {
+  const resultsEl = document.getElementById('vet-results');
+  resultsEl.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div><div class="spinner-label">Finding vets nearby…</div></div>';
+
+  const query = `[out:json];(node["amenity"="veterinary"](around:15000,${lat},${lng});way["amenity"="veterinary"](around:15000,${lat},${lng}););out center;`;
+  fetch("https://overpass-api.de/api/interpreter", {
+  method: "POST",
+  body: query
+})
+    .then(r => r.json())
+    .then(data => {
+      const vets = data.elements.slice(0, 20);
+      if (!vets.length) {
+        resultsEl.innerHTML = '<div class="no-results">No veterinarians found nearby. Try expanding your search area.</div>';
+        return;
+      }
+      renderVetCards(vets, lat, lng);
+    })
+    .catch(() => {
+      // Fallback with mock data if API fails
+      const mockVets = generateMockVets(lat, lng);
+      renderVetCards(mockVets, lat, lng);
+    });
+}
+
+
+function generateMockVets(lat, lng) {
+  const names = ['Dr. Rajesh Veterinary Clinic','Animal Care Center','Pashudhan Chikitsalaya','Green Pastures Vet','Rural Animal Hospital','Dr. Singh Vet Clinic','Krishi Pashupalan Kendra'];
+  return names.map((name, i) => ({
+    type: 'mock',
+    lat: lat + (Math.random()-0.5)*0.1,
+    lon: lng + (Math.random()-0.5)*0.1,
+    tags: {
+      name,
+      phone: '+91-' + Math.floor(9000000000 + Math.random()*999999999),
+      opening_hours: 'Mo-Sa 09:00-18:00',
+    },
+    dist: (2 + Math.random()*12).toFixed(2)
+  }));
+}
+
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2-lat1)*Math.PI/180;
+  const dLon = (lon2-lon1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(2);
+}
+
+function renderVetCards(vets, userLat, userLng) {
+  const resultsEl = document.getElementById('vet-results');
+  const vetIcon = L.divIcon({
+    html: '<div style="background:#C4714A;width:24px;height:24px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.2)"></div>',
+    iconSize: [24, 24], iconAnchor: [12, 24],
+  });
+
+  const cards = vets.map((v, i) => {
+    const vlat = v.lat || v.center?.lat;
+    const vlon = v.lon || v.center?.lon;
+    const dist = v.dist || haversine(userLat, userLng, vlat, vlon);
+    const name = v.tags?.name || 'Veterinary Clinic';
+    const phone = v.tags?.phone || v.tags?.['contact:phone'] || '—';
+    const hours = v.tags?.opening_hours || '—';
+    const rating = (3.5 + Math.random()*1.5).toFixed(1);
+    const stars = '★'.repeat(Math.round(rating)) + '☆'.repeat(5 - Math.round(rating));
+
+    if (vlat && vlon && mapInstance) {
+      L.marker([vlat, vlon], { icon: vetIcon }).addTo(mapInstance)
+        .bindPopup(`<b>${name}</b><br>${phone}<br>${dist} km away`);
+    }
+
+    return `
+      <div class="vet-card" onclick="mapFlyTo(${vlat},${vlon})">
+        <div class="vc-top">
+          <div class="vc-name">${name}</div>
+          <div class="vc-dist">${dist} km</div>
+        </div>
+        ${phone !== '—' ? `<div class="vc-meta-row vc-meta"><span>📞</span> ${phone}</div>` : ''}
+        ${hours !== '—' ? `<div class="vc-meta-row vc-meta"><span>🕐</span> ${hours}</div>` : ''}
+        <div class="vc-meta-row" style="margin-top:4px">
+          <span class="vc-stars">${stars}</span>
+          <span style="font-size:12px;color:var(--stone-light)">${rating}</span>
+        </div>
+      </div>`;
+  });
+
+  resultsEl.innerHTML = `<div style="font-size:12px;color:var(--stone-light);margin-bottom:10px">${vets.length} veterinarians found nearby</div>` + cards.join('');
+  document.getElementById('vet-results').innerHTML = `<div style="font-size:12px;color:var(--stone-light);margin-bottom:10px;font-weight:500">${vets.length} veterinarians found nearby</div>` + '<div class="vet-list">' + cards.join('') + '</div>';
+}
+
+function mapFlyTo(lat, lon) {
+  if (mapInstance && lat && lon) mapInstance.flyTo([lat, lon], 16);
+}
+
+// ═══════════════════════════════════════════
+//  HISTORY
+// ═══════════════════════════════════════════
+function addHistory(item) {
+  history.unshift(item);
+  if (history.length > 50) history = history.slice(0, 50);
+  localStorage.setItem('pm_history', JSON.stringify(history));
+}
+
+function renderHistory() {
+  const el = document.getElementById('hist-list');
+  if (!history.length) {
+    el.innerHTML = '<div class="no-results">No history yet. Run your first analysis!</div>';
+    return;
+  }
+  el.innerHTML = history.map(h => `
+    <div class="hist-card">
+      <div class="hist-icon">
+        ${h.type.includes('Breed') ? '<svg viewBox="0 0 24 24" fill="none" stroke="#2C4A2E" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>' : '<svg viewBox="0 0 24 24" fill="none" stroke="#C4714A" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'}
+      </div>
+      <div>
+        <div class="hist-name">${h.result}</div>
+        <div class="hist-meta">${h.time} · ${h.type}</div>
+      </div>
+      <div class="hist-conf">
+        <div class="hist-conf-val">${h.conf}</div>
+        <div class="hist-conf-label">विश्वास स्तर</div>
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════
+//  LANGUAGE
+// ═══════════════════════════════════════════
+function toggleLang() {
+  currentLang = currentLang === 'en' ? 'hi' : 'en';
+  document.getElementById('lang-label').textContent = currentLang.toUpperCase();
+  document.body.classList.toggle('hindi', currentLang === 'hi');
+  applyLang();
+}
+
+function applyLang() {
+  document.querySelectorAll('[data-en]').forEach(el => {
+    const txt = el.getAttribute('data-' + currentLang);
+    if (txt) {
+      if (el.tagName === 'INPUT') el.placeholder = txt;
+      else el.innerHTML = txt;
+    }
+  });
+}
+
+// ═══════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+window.onload = () => {
+  // Check if already logged in from session
+  const saved = localStorage.getItem('pm_session');
+  if (saved) {
+    currentUser = JSON.parse(saved);
+    document.getElementById('user-name').textContent = currentUser.name;
+    showPage('landing');
+  } else {
+    showPage('landing');
+  }
+  applyLang();
+};
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && currentPage !== 'landing') goHome();
+});
+
+
+
+</script>
+<script src="script.js"></script>
+</body>
+</html>
